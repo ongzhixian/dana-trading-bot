@@ -1,4 +1,5 @@
 # Byte-compiled / optimized / DLL files
+__pycache__
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,10 +23,13 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
+*.egg-info
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
+*.swp
+package-lock.json
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -49,6 +53,7 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
+.pytest_cache
 .pytest_cache/
 
 # Translations
@@ -127,3 +132,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+# ZX Custom
+ako.ps1

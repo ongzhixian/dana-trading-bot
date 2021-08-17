@@ -12,25 +12,62 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      aws_region:
+        description: 'AWS-Region'
+        required: true
+        default: 'us-east-1'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  prod_build:
+    if: ${{ github.ref == 'refs/heads/main' }}
+
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    
+    # Set default AWS region
+    env:
+      aws_region: 'us-east-1'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      # Install the required Python packages
+      - name: Run python virtual environment and install required packages
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          python3 -m venv .venv
+          pip install -r requirements.txt
+
+      # Install CDK and test it
+      - name: Install CDK and test-run CDK 
+        run: |
+          npm install -g aws-cdk
+          cdk --version
+
+      # Use manually set aws_region (if trigger from workflow_dispatch for disaster recovery purposes)
+      - name: Set aws_region environment variable from workflow_dispatch (if defined)
+        if: ${{ github.event.inputs.aws_region }}
+        run: echo "aws_region=${{ github.event.inputs.aws_region }}" >> $GITHUB_ENV
+        
+      - name: Display aws_region
+        run: echo Set AWS region is ${{ env.aws_region }}
+
+      # Configure AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+      # # Run tests
+      # - name: Run tests
+      #   run: pytest
+
+      # # Deploy using CDK
+      # - name: Deploy
+      #   run: cdk deploy
