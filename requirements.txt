@@ -1,7 +1,7 @@
 -e .
 aws-cdk.aws-apigateway
 aws-cdk.aws-lambda
-
+requests
 # aws-cdk.aws-sqs
 # aws-cdk.aws-sns
 # aws-cdk.aws-sns-subscriptions

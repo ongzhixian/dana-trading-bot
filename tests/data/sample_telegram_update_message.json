@@ -1,0 +1,23 @@
+{
+    "update_id": 389894222,
+    "message": {
+        "message_id": 6,
+        "from": {
+            "id": 53274105,
+            "is_bot": false,
+            "first_name": "Zhixian",
+            "last_name": "Ong",
+            "username": "zhixian",
+            "language_code": "en"
+        },
+        "chat": {
+            "id": 53274105,
+            "first_name": "Zhixian",
+            "last_name": "Ong",
+            "username": "zhixian",
+            "type": "private"
+        },
+        "date": 1629297235,
+        "text": "Hello test"
+    }
+}

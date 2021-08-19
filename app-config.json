@@ -1,0 +1,6 @@
+{
+    "name" : "sampe",
+    "version" : "0.0.0",
+    "production_db_url": "FAKE_ACTUAL_PROD_DB_URL",
+    "development_db_url": "FAKE_ACTUAL_DEV_DB_URL"
+}

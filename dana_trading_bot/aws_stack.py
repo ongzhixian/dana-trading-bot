@@ -1,3 +1,5 @@
+import json
+
 from aws_cdk import core as cdk
 
 # For consistency with other languages, `cdk` is the preferred import name for
@@ -28,6 +30,12 @@ class DanaTradingBotStack(cdk.Stack):
         # Lambda functions
         # REST API Gateway 
 
+        with open("app-config.json", "r") as in_file:
+            config = json.loads(in_file.read())
+
+        print("production_db_url: {}".format(config['production_db_url']))
+        print("development_db_url: {}".format(config['development_db_url']))
+
         # The code that defines your stack goes here
 
         # Define the Lambda functions that we will create here
@@ -39,6 +47,10 @@ class DanaTradingBotStack(cdk.Stack):
             runtime=lambda_.Runtime.PYTHON_3_7,
             code=lambda_.Code.asset('lambdaFunctions'),
             handler='telegram_bot.update_handler',
+            environment={ # ADD THIS, FILL IT FOR ACTUAL VALUE 
+                "production_db_url": config['production_db_url'],
+                "development_db_url": config['development_db_url']
+            }
         )
 
         # REST API Gateway
