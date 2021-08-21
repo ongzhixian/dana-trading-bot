@@ -13,6 +13,8 @@ from aws_cdk import (
     # aws_lambda_event_sources as lambda_event_source,
     aws_lambda as lambda_,
     aws_apigateway as api_gateway,
+    aws_kms as kms,
+    aws_dynamodb as dynamodb,
     core
 )
 
@@ -23,6 +25,7 @@ class DanaTradingBotStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
+        # Define KMS CMS
         # S3 buckets
         # DynamoDB tables
         # SQS queues
@@ -37,6 +40,26 @@ class DanaTradingBotStack(cdk.Stack):
         print("development_db_url: {}".format(config['development_db_url']))
 
         # The code that defines your stack goes here
+
+        # Define KMS CMS
+        
+        kms.Key(self, 'dynamoDbConfig', 
+            alias="dynamoDbConfig",
+            description="Key for DynamoDB secrets"
+        )
+
+        # DynamoDB tables
+
+        dana_table = dynamodb.Table(
+            self, "dana_table",
+            table_name="dana_table",
+            read_capacity=5,
+            write_capacity=5,
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            )
+        )
 
         # Define the Lambda functions that we will create here
 
