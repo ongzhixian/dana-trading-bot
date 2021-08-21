@@ -1,0 +1,16 @@
+{
+    'ResponseMetadata': {
+        'RequestId': '85EKN8OLAM0J3NKKTPBS32TCSVVV4KQNSO5AEMVJF66Q9ASUAAJG', 
+        'HTTPStatusCode': 200, 
+        'HTTPHeaders': {
+            'server': 'Server', 
+            'date': 'Sat, 21 Aug 2021 12: 39: 35 GMT', 
+            'content-type': 'application/x-amz-json-1.0', 
+            'content-length': '2', 
+            'connection': 'keep-alive', 
+            'x-amzn-requestid': '85EKN8OLAM0J3NKKTPBS32TCSVVV4KQNSO5AEMVJF66Q9ASUAAJG', 
+            'x-amz-crc32': '2745614147'
+        }, 
+        'RetryAttempts': 0
+    }
+}
