@@ -1,10 +1,16 @@
 -e .
 aws-cdk.aws-apigateway
+aws-cdk.aws-dynamodb
+aws-cdk.aws-kms
 aws-cdk.aws-lambda
+behave
+boto3
+cryptography
+dynamodb-encryption-sdk
 requests
+
 # aws-cdk.aws-sqs
 # aws-cdk.aws-sns
 # aws-cdk.aws-sns-subscriptions
 # aws-cdk.aws-lambda-event-sources
 # jsonschema
-# boto3
