@@ -3,17 +3,18 @@ import boto3
 from boto3.dynamodb.types import Binary, Decimal
 import requests
 import warnings
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from mods.ddb import store, retrieve, remove
 
 class TestDdb(unittest.TestCase):
 
     # Dictionary of mock test data
+    # 'RequestId': '75N4RS5BDFE4NGOK864RHBFBH7VV4KQNSO5AEMVJF66Q9ASUAAJG', 
     mock_data = {
         'RESPONSE_METADATA' : {
             'ResponseMetadata': {
-                'RequestId': '75N4RS5BDFE4NGOK864RHBFBH7VV4KQNSO5AEMVJF66Q9ASUAAJG', 
+                'RequestId': 'AAA4RS5BDFE4NGOK864RHBFBH7VV4KQNSO5AEMVJF66Q9ASUAAJG', 
                 'HTTPStatusCode': 200, 
                 'HTTPHeaders': {
                     'server': 'Server', 
@@ -80,10 +81,10 @@ class TestDdb(unittest.TestCase):
         dana_table = dynamodb.Table('dana_table')
         
         # Act
-        #response = dana_table.put_item(Item=plaintext_item)
-        with patch('tests.unit.test_dynamodb.store') as mock_module_method:
-            mock_module_method.return_value = self.mock_data['RESPONSE_METADATA']
-            response = store(dana_table, plaintext_item)
+        mock_table = Mock()
+        mock_table.put_item.return_value = self.mock_data['RESPONSE_METADATA']
+
+        response = store(mock_table, plaintext_item)
 
         response_metadata = None
 
@@ -111,9 +112,24 @@ class TestDdb(unittest.TestCase):
         dana_table = dynamodb.Table('dana_table')
         
         # Act
-        with patch('tests.unit.test_dynamodb.store') as mock_module_method:
-            mock_module_method.return_value = self.mock_data['RESPONSE_METADATA']
-            response = store(dana_table, plaintext_item, encrypt=True)
+        # Create an instance of a mock(EncryptedTable)
+        mock_table = Mock()
+        mock_table.put_item.return_value = self.mock_data['RESPONSE_METADATA']
+
+        #with patch('dynamodb_encryption_sdk.encrypted.table.EncryptedTable') as mock_encrypted_table:
+        with patch('mods.ddb.EncryptedTable') as mock_encrypted_table:
+            mock_encrypted_table.return_value = mock_table
+            response = store(Mock(), plaintext_item, encrypt=True)
+            
+        # with patch(f'{__name__}.store') as mock_module_method:
+        #     mock_module_method.return_value = self.mock_data['RESPONSE_METADATA']
+        #     response = store(dana_table, plaintext_item, encrypt=True)
+
+        # mock_table = Mock()
+        # mock_table.put_item.return_value = self.mock_data['RESPONSE_METADATA']
+
+        # response = store(dana_table, plaintext_item, encrypt=True)
+        # print(response)
 
         response_metadata = None
 
@@ -128,6 +144,7 @@ class TestDdb(unittest.TestCase):
         self.assertIsNotNone(response_metadata)
         self.assertEqual(200, http_status_code)
 
+    #@unittest.skip("Reduce noise while checking other tests")
     def test_retrieve_data(self):
 
         warnings.simplefilter("ignore", ResourceWarning)
@@ -142,9 +159,14 @@ class TestDdb(unittest.TestCase):
         dana_table = dynamodb.Table('dana_table')
         
         # Act
-        with patch('tests.unit.test_dynamodb.retrieve') as mock_module_method:
-            mock_module_method.return_value = self.mock_data['RETRIEVE_ITEM']
-            response = retrieve(dana_table, {'id': 'SAMPLE1'})
+        mock_table = Mock()
+        mock_table.get_item.return_value = self.mock_data['RETRIEVE_ITEM']
+
+        response = retrieve(mock_table, {'id': 'SAMPLE1'})
+
+        # with patch(f'{__name__}.retrieve') as mock_module_method:
+        #     mock_module_method.return_value = self.mock_data['RETRIEVE_ITEM']
+        #     response = retrieve(dana_table, {'id': 'SAMPLE1'})
 
         response_metadata = None
         response_item = None
@@ -164,6 +186,7 @@ class TestDdb(unittest.TestCase):
         self.assertIsNotNone(response_item)
         self.assertEqual(200, http_status_code)
 
+    #@unittest.skip  # no reason needed
     def test_retrieve_encrypted_data(self):
 
         warnings.simplefilter("ignore", ResourceWarning)
@@ -178,9 +201,17 @@ class TestDdb(unittest.TestCase):
         dana_table = dynamodb.Table('dana_table')
         
         # Act
-        with patch('tests.unit.test_dynamodb.retrieve') as mock_module_method:
-            mock_module_method.return_value = self.mock_data['RESPONSE_METADATA']
+        mock_table = Mock()
+        mock_table.get_item.return_value = self.mock_data['RETRIEVE_ITEM']
+
+        #with patch('dynamodb_encryption_sdk.encrypted.table.EncryptedTable') as mock_encrypted_table:
+        with patch('mods.ddb.EncryptedTable') as mock_encrypted_table:
+            mock_encrypted_table.return_value = mock_table
             response = retrieve(dana_table, {'id': 'SAMPLE1'}, encrypt=True)
+
+        # with patch(f'{__name__}.retrieve') as mock_module_method:
+        #     mock_module_method.return_value = self.mock_data['RETRIEVE_ITEM']
+        #     response = retrieve(dana_table, {'id': 'SAMPLE1'}, encrypt=True)
 
         response_metadata = None
         response_item = None
@@ -197,7 +228,7 @@ class TestDdb(unittest.TestCase):
         # Assert(s)
 
         self.assertIsNotNone(response_metadata)
-        self.assertIsNone(response_item)
+        self.assertIsNotNone(response_item)
         self.assertEqual(200, http_status_code)
 
     def test_remove_item(self):
@@ -214,9 +245,19 @@ class TestDdb(unittest.TestCase):
         dana_table = dynamodb.Table('dana_table')
         
         # Act
-        with patch('tests.unit.test_dynamodb.remove') as mock_module_method:
-            mock_module_method.return_value = self.mock_data['RETRIEVE_ITEM']
-            response = remove(dana_table, {'id': 'sample8'})
+        # The following line works when we run test directly (aka: python -m unittest tests\unit\test_dynamodb.py)
+        # with patch('tests.unit.test_dynamodb.remove') as mock_module_method:
+        # But patching will fail when we "discover" tests (aka: python -m unittest discover -s tests\unit -v)
+        # Because of the way patching works in Python, name patch method f"{__name__}.remove"
+        #with patch(f"{__name__}.remove") as mock_module_method:
+        # with patch("mods.ddb.remove") as mock_module_method:
+        #     mock_module_method.return_value = self.mock_data['RESPONSE_METADATA']
+        
+        mock_table = Mock()
+        mock_table.delete_item.return_value = self.mock_data['RESPONSE_METADATA']
+        
+        response = remove(mock_table, {'id': 'sample8'})
+        #print(response)
 
         response_metadata = None
         http_status_code = 0
@@ -232,5 +273,5 @@ class TestDdb(unittest.TestCase):
         self.assertIsNotNone(response_metadata)
         self.assertEqual(200, http_status_code)
 
-if __name__ == '__main__':
-    unittest.main()
+# if __name__ == '__main__':
+#     unittest.main()

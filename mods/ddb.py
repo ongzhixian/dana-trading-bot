@@ -24,7 +24,6 @@ def get_encrypted_table(dynamodb_table, custom_attribute_actions=None):
 def store(dynamodb_table, dynamodb_item, encrypt=False):
     if encrypt:
         return get_encrypted_table(dynamodb_table).put_item(Item=dynamodb_item)
-        
     return dynamodb_table.put_item(Item=dynamodb_item)
 
 
@@ -42,5 +41,5 @@ def remove(dynamodb_table, dynamodb_key):
 #     encrypted_table.put_item(dynamodb_item)
 
 
-def demo(dynamodb_table, dynamodb_item, encrypt=False):
-    return "DEMO1"
+# def demo(dynamodb_table, dynamodb_item, encrypt=False):
+#     return "DEMO1"
