@@ -5,6 +5,7 @@ aws-cdk.aws-kms
 aws-cdk.aws-lambda
 behave
 boto3
+coverage
 cryptography
 dynamodb-encryption-sdk
 requests
