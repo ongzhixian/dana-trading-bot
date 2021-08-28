@@ -7,10 +7,10 @@ from aws_cdk import core as cdk
 # with examples from the CDK Developer's Guide, which are in the process of
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import (
-    # aws_sqs as sqs,
     # aws_sns as sns,
     # aws_sns_subscriptions as subs,
     # aws_lambda_event_sources as lambda_event_source,
+    aws_sqs as sqs,
     aws_lambda as lambda_,
     aws_apigateway as api_gateway,
     aws_kms as kms,
@@ -43,10 +43,10 @@ class DanaTradingBotStack(cdk.Stack):
 
         # Define KMS CMS
         
-        kms.Key(self, 'dynamoDbConfig', 
-            alias="dynamoDbConfig",
-            description="Key for DynamoDB secrets"
-        )
+        # kms.Key(self, 'dynamoDbConfig', 
+        #     alias="dynamoDbConfig",
+        #     description="Key for DynamoDB secrets"
+        # )
 
         # DynamoDB tables
 
@@ -60,6 +60,30 @@ class DanaTradingBotStack(cdk.Stack):
                 type=dynamodb.AttributeType.STRING
             )
         )
+
+        ## SQS queues
+
+        sqs_test_message_dlq = sqs.Queue(
+            self, "dev-sqs-test-message-dlq",
+            queue_name = "dev-sqs-test-message-dlq",
+            visibility_timeout=core.Duration.seconds(300),
+            #encryption=
+            #encryption_master_key=
+        )
+        #dlq_messages_handler.add_event_source(lambda_event_source.SqsEventSource(poc_dead_letter_queue))
+
+        sqs_test_message = sqs.Queue(
+            self, "dev-sqs-test-message",
+            queue_name = "dev-sqs-test-message",
+            visibility_timeout=core.Duration.seconds(300),
+            dead_letter_queue=sqs.DeadLetterQueue( max_receive_count=5, queue=sqs_test_message_dlq )
+            #encryption=
+            #encryption_master_key=
+        )
+
+        # sqs_event_source = lambda_event_source.SqsEventSource(poc_queue)
+        # trade_message_handler.add_event_source(sqs_event_source)
+
 
         # Define the Lambda functions that we will create here
 
@@ -82,4 +106,19 @@ class DanaTradingBotStack(cdk.Stack):
             self, 'dana_update_message_endpoint',
             description="Dana bot update messages endpoint",
             handler=dana_update_handler,
+        )
+
+        # SNS topics
+
+        # topic = sns.Topic(
+        #     self, "dev-sns-pocAwsPython", 
+        #     topic_name="dev-sns-pocAwsPython"
+        # )
+
+        # topic.add_subscription(subs.SqsSubscription(queue))
+
+        core.CfnOutput(self, "sqs_test_message",
+            value=sqs_test_message.queue_url,
+            description="asdads",
+            export_name="sqs-test-message-queue-url"
         )

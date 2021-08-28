@@ -15,8 +15,8 @@ setuptools.setup(
 
     author="Ong Zhi Xian",
 
-    package_dir={"": "dana_trading_bot"},
-    packages=setuptools.find_packages(where="dana_trading_bot"),
+    package_dir={"": "cdk"},
+    packages=setuptools.find_packages(where="cdk"),
 
     install_requires=[
         "aws-cdk.core==1.118.0",

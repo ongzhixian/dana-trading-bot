@@ -9,10 +9,18 @@ from aws_cdk import core as cdk
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import core
 
-from dana_trading_bot.aws_stack import DanaTradingBotStack
+from app_helper import get_deployment_type, get_stack_config, get_cdk_defaults
+from cdk.aws_stack import DanaTradingBotStack
 
 
 app = core.App()
+
+deployment_type=get_deployment_type(app.node)
+
+stack_config=get_stack_config(deployment_type)
+
+(cdk_default_account, cdk_default_region) = get_cdk_defaults(app.node, stack_config, deployment_type)
+
 DanaTradingBotStack(app, "DanaTradingBotStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
@@ -26,9 +34,13 @@ DanaTradingBotStack(app, "DanaTradingBotStack",
     # Uncomment the next line if you know exactly what Account and Region you
     # want to deploy the stack to. */
 
-    #env=core.Environment(account='123456789012', region='us-east-1'),
+    env=core.Environment(account=cdk_default_account, region=cdk_default_region),
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
     )
+
+# Add tags
+#core.Tags.of(DanaTradingBotStack).add("cfg-owner", "zx")
+#core.Tags.of(DanaTradingBotStack).add("application", "dana_trading_bot")
 
 app.synth()

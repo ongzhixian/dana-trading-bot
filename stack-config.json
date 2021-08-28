@@ -1,0 +1,12 @@
+{
+    "dev" : {
+        "cdk": {
+            "default_account" : "009167579319",
+            "default_region" : "us-east-1"
+        }
+    },
+
+    "prd" : {
+        
+    }
+}

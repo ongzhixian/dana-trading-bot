@@ -3,6 +3,7 @@ aws-cdk.aws-apigateway
 aws-cdk.aws-dynamodb
 aws-cdk.aws-kms
 aws-cdk.aws-lambda
+aws-cdk.aws-sqs
 behave
 boto3
 coverage
