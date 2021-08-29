@@ -3,6 +3,7 @@ aws-cdk.aws-apigateway
 aws-cdk.aws-dynamodb
 aws-cdk.aws-kms
 aws-cdk.aws-lambda
+aws-cdk.aws-lambda-event-sources
 aws-cdk.aws-sqs
 behave
 boto3
@@ -14,5 +15,5 @@ requests
 # aws-cdk.aws-sqs
 # aws-cdk.aws-sns
 # aws-cdk.aws-sns-subscriptions
-# aws-cdk.aws-lambda-event-sources
+# 
 # jsonschema
