@@ -21,7 +21,7 @@ stack_config=get_stack_config(deployment_type)
 
 (cdk_default_account, cdk_default_region) = get_cdk_defaults(app.node, stack_config, deployment_type)
 
-DanaTradingBotStack(app, "DanaTradingBotStack",
+danaTradingBotStack = DanaTradingBotStack(app, "DanaTradingBotStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
@@ -40,7 +40,10 @@ DanaTradingBotStack(app, "DanaTradingBotStack",
     )
 
 # Add tags
-#core.Tags.of(DanaTradingBotStack).add("cfg-owner", "zx")
-#core.Tags.of(DanaTradingBotStack).add("application", "dana_trading_bot")
+# Add application-wide tags
+core.Tags.of(app).add("app", "dana_trading_bot")
+
+# Add stack-wide tags
+core.Tags.of(danaTradingBotStack).add("stack-name", "DanaTradingBotStack");
 
 app.synth()
