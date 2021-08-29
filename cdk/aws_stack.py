@@ -9,7 +9,7 @@ from aws_cdk import core as cdk
 from aws_cdk import (
     # aws_sns as sns,
     # aws_sns_subscriptions as subs,
-    # aws_lambda_event_sources as lambda_event_source,
+    aws_lambda_event_sources as lambda_event_source,
     aws_sqs as sqs,
     aws_lambda as lambda_,
     aws_apigateway as api_gateway,
@@ -66,23 +66,23 @@ class DanaTradingBotStack(cdk.Stack):
         sqs_test_message_dlq = sqs.Queue(
             self, "dev-sqs-test-message-dlq",
             queue_name = "dev-sqs-test-message-dlq",
-            visibility_timeout=core.Duration.seconds(300),
+            # dead_letter_queue=sqs.DeadLetterQueue( max_receive_count=2, queue=sqs_test_message ),
+            # visibility_timeout=core.Duration.seconds(300),
             #encryption=
             #encryption_master_key=
         )
-        #dlq_messages_handler.add_event_source(lambda_event_source.SqsEventSource(poc_dead_letter_queue))
 
         sqs_test_message = sqs.Queue(
             self, "dev-sqs-test-message",
             queue_name = "dev-sqs-test-message",
-            visibility_timeout=core.Duration.seconds(300),
-            dead_letter_queue=sqs.DeadLetterQueue( max_receive_count=5, queue=sqs_test_message_dlq )
+            # visibility_timeout=core.Duration.seconds(300),
+            dead_letter_queue=sqs.DeadLetterQueue( max_receive_count=1, queue=sqs_test_message_dlq ),
+            
             #encryption=
             #encryption_master_key=
         )
 
-        # sqs_event_source = lambda_event_source.SqsEventSource(poc_queue)
-        # trade_message_handler.add_event_source(sqs_event_source)
+
 
 
         # Define the Lambda functions that we will create here
@@ -99,6 +99,35 @@ class DanaTradingBotStack(cdk.Stack):
                 "development_db_url": config['development_db_url']
             }
         )
+
+        # SQS handlers
+
+        sqs_test_message_dlq_handler = lambda_.Function(
+            self, 'DeadLetterQueueMessageHandler',
+            function_name="sqs_test_message_dlq_handler",
+            description="Process dead letter queue messages",
+            runtime=lambda_.Runtime.PYTHON_3_7,
+            code=lambda_.Code.asset('lambdaFunctions'),
+            handler='sqs_handlers.sqs_test_message_dlq_handler',
+        )
+
+        sqs_test_message_dlq_handler.add_event_source(lambda_event_source.SqsEventSource(sqs_test_message_dlq))
+
+        sqs_test_message_handler = lambda_.Function(
+            self, 'RegulatoryTradeMessageHandler',
+            function_name="sqs_test_message_handler",
+            description="Process trade message to be inserted into regulatory data mart",
+            runtime=lambda_.Runtime.PYTHON_3_7,
+            code=lambda_.Code.asset('lambdaFunctions'),
+            handler='sqs_handlers.sqs_test_message_handler',
+        )
+
+        # Create an SQS event source for Lambda and add SQS event source to the Lambda function
+        sqs_event_source = lambda_event_source.SqsEventSource(sqs_test_message)
+        sqs_test_message_handler.add_event_source(sqs_event_source)
+
+        sqs_test_message.grant_send_messages(sqs_test_message_handler)
+
 
         # REST API Gateway
 
